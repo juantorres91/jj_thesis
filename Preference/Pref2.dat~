@@ -1,0 +1,27 @@
+
+set MacroP:=
+'Efec'
+
+;
+
+param xo:=
+'Efec' 1 67.11
+'Efec' 2 127.4
+'Efec' 3 250.8
+'Efec' 4 500
+'Efec' 5 3000
+
+;
+
+param F:=
+'Efec' 1 9.51
+'Efec' 2 40.5
+'Efec' 3 89.59
+'Efec' 4 100
+'Efec' 5 100
+; 
+
+
+
+
+
