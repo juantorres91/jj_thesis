@@ -1,0 +1,12 @@
+import pyomo.environ as pe
+import pyomo.opt as pot
+
+# Nuevo modelo
+
+m = pe.AbstractModel() # Modelo de optimización
+
+# Conjuntos
+
+m.I = pe.Set(intialize = ['Cont', 'Disp', 'Thick', 'Surf'])
+
+
