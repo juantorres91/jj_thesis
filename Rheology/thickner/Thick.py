@@ -1,5 +1,5 @@
-from pyomo.environ import*
-from pyomo.opt     import SolverFactory
+from pyomo.environ import * 
+from pyomo.opt import SolverFactory
 
 def model(I_muo=30, kpo=1, Cto=0.6,Sro=100, Reo=1):
     """Thickner Model """ 

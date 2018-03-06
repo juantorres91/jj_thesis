@@ -4,50 +4,56 @@ from pyomo.opt import SolverFactory
 def pref_model(in_file):
     """ Preference model generator"""
 
-    m=AbstractModel()
-    g=Block()
-    #Sets----------------------
- 
-    m.MacroP=Set()       # Macroscopic properties set
-    m.Cuts=RangeSet(1,6) # Cutting approximation  set
+    m = AbstractModel()
+
+    #
+    # Sets
+    #
+
+    m.MacroP = Set()       # Macroscopic properties set
+    m.Cuts = RangeSet(1,6) # Cutting approximation  set
+
+    #
+    # Parameters
+    #
+
+    m.w = Param(m.MacroP, default=0)          # Properties ponderation weights
+    m.m1 = Param(m.MacroP, m.Cuts, default=0) # Cutting Planes Slope
+    m.b1 = Param(m.MacroP, m.Cuts, default=0) # Cutting Plane  Intersect
     
-    #Param---------------------
-    m.w =Param(m.MacroP, default=0)         #Properties ponderation weights
-    m.m1=Param(m.MacroP, m.Cuts, default=0) #Cutting Planes Slope
-    m.b1=Param(m.MacroP, m.Cuts, default=0) #Cutting Plane  Intersect
-    
-    #Variables-----------------
-    m.y=Var(m.MacroP, initialize= 100, bounds=(-30,100))  #Customer preference
+    #
+    # Variables
+    #
+
+    m.y = Var(m.MacroP, initialize= 100, bounds=(-30,100))  # Customer preference
 
     def x_init(m,i):
-        if i=='Efec':
+        if i == 'Efec':
             return 100
-        elif i=='Smot':
+        elif i == 'Smot':
             return 1.5
         else:
             return 50 
-    m.x=Var(m.MacroP, domain=PositiveReals, initialize=x_init)            #Assorted property values
-    m.Pr=Var(domain=PositiveReals)                  #Customer Preference
+    m.x = Var(m.MacroP, domain=PositiveReals, initialize=x_init)  # Assorted property values
+    m.Pr = Var(domain=PositiveReals)                              # Customer Preference
 
-    #Equations------------------
+    # Equations
     def Cutting(m,i,j):  #Property cutting approximation
-        if m.m1[i,j]!=0 and m.b1[i,j]!=0:
-            return m.y[i]<=m.m1[i,j]*m.x[i]+m.b1[i,j]
+        if m.m1[i,j] ! =0 and m.b1[i,j] != 0:
+            return m.y[i] <= m.m1[i,j]*m.x[i]+m.b1[i,j]
         else:
             return Constraint.Skip
     m.Cutting=Constraint(m.MacroP, m.Cuts, rule=Cutting)
     
     def Prop_Cal(m):
-        return m.Pr==summation(m.w,m.y)
-    m.Prop_Cal=Constraint(rule=Prop_Cal)
+        return m.Pr == summation(m.w,m.y)
+    m.Prop_Cal = Constraint(rule=Prop_Cal)
 
-    #Model generation
+    # Model generation
 
-    g=m.create_instance(in_file)
+    m = m.create_instance(in_file)
 
-   # g.pprint() 
-
-    return g
+    return m
 
 
 def piece_model(pref_file):
@@ -132,8 +138,6 @@ def piece_model(pref_file):
        
     g=m.create_instance(pref_file)
 
-    
-  
     
     return g
 
