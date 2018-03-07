@@ -1,1 +1,2 @@
+from pal import pal_viscosity_model
 from oldroyd import oldroyd_viscosity_model

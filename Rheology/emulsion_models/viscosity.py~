@@ -1,10 +1,44 @@
-import pyomo.environ as pe 
 from pyomo.opt import SolverFactory
+import pyomo.environ as pe 
 
-__all__ = ['oldroyd_viscosity_model'] 
+__all__ = ['oldroyd_viscosity_model',
+           'yaron_viscosity_model'] 
+
+# Shared parameters
+
+atr = ['v', 'k', 'c_mu',
+       'Sr', 'st', 'dB']  # List of commom fixed variables
 
 
-def model(v0=0.3, k0=0.3, cmu=0.01, Sr0=100, st0=13, d0=4, mu0=10):
+def initialize_model(m, disp = False):
+
+    """
+    Initializes viscosity models  
+   
+    Returns
+    -------
+    m : Concrete model
+    """
+
+    # Initializaion parameters
+    m.bounds = pe.ConstraintList()
+
+    for i in atr:
+        try :
+            m.bounds.add(expr = getattr(m,i) == getattr(m,i).value)
+
+        except :
+            pass 
+
+    opt = SolverFactory('ipopt')  # Solver
+    opt.solve(m, tee=disp)        # Initialize
+    m.del_component(m.bounds)     # Delets initial specification 
+    
+    return m
+
+
+
+def oldroyd_viscosity_model(v0=0.3, k0=0.3, c_mu0=0.01, st0=13, dD0=4, mu0=10, Sr0=100, disp = False):
 
     """
     Oldroyd viscosity model
@@ -15,8 +49,14 @@ def model(v0=0.3, k0=0.3, cmu=0.01, Sr0=100, st0=13, d0=4, mu0=10):
        Intial volume fraction
     k0 : float
        Initial viscosity ratio
-    cmu : float
-       Initial continous fase viscosity [-]
+    c_mu0 : float
+       Initial continous phase viscosity [P]
+    
+    mu0 : float
+       Initial emulsion viscosity [P]
+    
+    dD0 : float
+       Initial drop diameter
     Sr0 : float
        Initial shear rate [-] 
 
@@ -33,7 +73,7 @@ def model(v0=0.3, k0=0.3, cmu=0.01, Sr0=100, st0=13, d0=4, mu0=10):
     
     l10 = (19*k0+16)*(2*k0+3)/(40*(k0+1))*(1+(19*k0+16)*v0/(5*(k0+1)*(2*k0+3)))     # l1 initialization
     l20 = (19*k0+16)*(2*k0+3)/(40*(k0+1))*(1-3*(19*k0+16)*v0/(10*(k0+1)*(2*k0+3)))  # l2 initializatiom
-    Nca0 = 1e-4*cmu*d0*Sr0/(2*st0)                                                  # Capilarity number iniialization
+    Nca0 = 1e-4*c_mu0*dD0*Sr0/(2*st0)                                               # Capilarity number iniialization
     y10 = (1+(5*k0+2)*v0/(2*(k0+1))+(5*k0+2)**2/(10*(k0+1)**2))*v0**2               # Y1 initialization
     y20 = (1+l10*l20*Nca0**2)/(1+l10**2*Nca0**2)                                    # Y2 initialization
 
@@ -52,11 +92,11 @@ def model(v0=0.3, k0=0.3, cmu=0.01, Sr0=100, st0=13, d0=4, mu0=10):
     # Shared variables
     m.Sr = pe.Var(initialize=Sr0, bounds=(1e1, 1e7))  # Shear rate [s-1]
     m.st = pe.Var(initialize=st0, bounds=(3, 100))    # I.Tension [mN/m]
-    m.dD = pe.Var(initialize=d0, bounds=(0.5,100))    # Dropplet size [1e-6 m]
+    m.dD = pe.Var(initialize=dD0, bounds=(0.5,100))   # Dropplet size [1e-6 m]
 
     m.v = pe.Var(bounds=(0.001, 0.7), initialize=v0)       # Oil volume fraction [-]
     m.k = pe.Var(bounds=(1e-7, 30), initialize=k0)         # Viscosity ratio [-]
-    m.c_mu = pe.Var(domain=pe.PositiveReals, initialize=cmu)  # Continuous phase dynamic viscosity [P]
+    m.c_mu = pe.Var(domain=pe.PositiveReals, initialize=c_mu0)  # Continuous phase dynamic viscosity [P]
     m.mu = pe.Var(domain=pe.PositiveReals, initialize=mu0)    # Emulsion phase dynamic viscosity [P]
     
     #
@@ -87,44 +127,52 @@ def model(v0=0.3, k0=0.3, cmu=0.01, Sr0=100, st0=13, d0=4, mu0=10):
         return m.mu == m.c_mu*m.y1*m.y2
     m.mu_def = pe.Constraint(rule=mu_def)    
 
-    return m
-    
+    return initialize_model(m, disp)
 
-def oldroyd_viscosity_model(v0=0.1, k0=0.3, cmu=0.01, Sr0=100,st0=13, d0=4, mu0=10):
+
+def yaron_viscosity_model(v0=0.3, c_mu0=0.01, d_mu0=1, k0=0.3,):
 
     """
-    Initializes oldryod viscosity model
-   
+    Pal viscosity model
+
     Parameters
     ----------
     v0 : float
        Intial volume fraction
     k0 : float
        Initial viscosity ratio
-    cmu : float
-       Initial continous fase viscosity [-]
-    Sr0 : float
-       Initial shear rate [-] 
-
+    c_mu0 : float
+       Initial continous phase viscosity [Pa.s]
+    d_mu0 : float
+       Initial disperse phase viscosity [Pa.s]
+    
     Returns
     -------
     m : Concrete model
+      Initialized and bounded model
     """
-    
-    m = model(v0, k0, cmu, Sr0, st0, d0, mu0)
 
-    # Initializaion parameters
-    m.bounds = pe.ConstraintList()
+    m = pe.ConcreteModel() # Yaron viscosity model 
+
+    #
+    # Variables 
+    #
     
-    m.bounds.add(expr = m.v == v0)
-    m.bounds.add(expr = m.k == k0)
-    m.bounds.add(expr = m.c_mu == cmu)
-    m.bounds.add(expr = m.Sr == Sr0)
-    m.bounds.add(expr = m.st == st0)
-    m.bounds.add(expr = m.dD == d0)
-        
-    opt = SolverFactory('ipopt')  # Solver
-    results = opt.solve(m)        # Initialize
-    m.del_component(m.bounds)     # Delets initial specification 
+    # Shared variables
+    m.v = pe.Var(bounds=(0.001, 0.7), initialize=v0)          # Oil volume fraction [-]
+    m.k = pe.Var(bounds=(1e-7, 30), initialize=k0)            # Viscosity ratio [-]
+    m.c_mu = pe.Var(domain=pe.PositiveReals, initialize=cmu)  # Continuous phase dynamic viscosity [P]
+    m.mu = pe.Var(domain=pe.PositiveReals, initialize=mu0)    # Emulsion phase dynamic viscosity [P]
     
+    #
+    # Constraints
+    #
+
+   
     return m
+
+
+if __name__ == '__main__':
+    import sys
+    m = oldroyd_viscosity_model(disp=False)
+    m.pprint()
