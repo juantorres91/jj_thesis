@@ -1,0 +1,30 @@
+__all__ = ['Chemical']
+
+
+
+class Chemical(object):
+    
+    """ 
+    Chemical compound
+
+    Parameters
+    ----------
+    
+    ID : str
+       Chemical identifier (i.e. CAS Number)
+    name : str
+       Compound name
+    """ 
+    
+    def __init__(self,ID = ):
+
+        # Component identification
+        self._ID = ''
+        self._name = ''
+
+        # Physical properties
+        self._MW = 0.0  # Molecular weight
+        self._m
+
+        # Property methods
+        self._
