@@ -1,0 +1,18 @@
+import pyomo.environ as pe
+from pure_component import Chemical 
+
+__all__ = ['Stream']
+
+
+class Stream(pe.ConcreteModel):
+
+    """ Stream type object
+    
+
+    """
+
+    def __init__(self):
+
+        # Model variables
+        m
+    

@@ -39,17 +39,21 @@ class Chemical(object):
         # Property methods
         self._mu_model = 'power_law_type' #  
 
-
         
-    @Property
+    @property
     def name(self):
         return self._name
 
+    #
+    # Viscosity models 
+    #
     
+    @property
+    def viscosity_model(self):
+        return self._mu_model
 
-        
-
-    def set_viscosity_model(self, model):
+    @viscosity_model.setter
+    def viscosity_model(self, model):
         """
         Set viscosity equation
         
@@ -68,7 +72,8 @@ class Chemical(object):
             
 if __name__ == '__main__':
     m = Chemical(name='a')
-        
+    m.viscosity_model = 'arrhenius_type'
+    print m.viscosity_model
     
 
         
