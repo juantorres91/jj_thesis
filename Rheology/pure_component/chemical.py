@@ -1,10 +1,8 @@
 import viscosity as vi
+import density as de
+# import surface as sc
+
 __all__ = ['Chemical']
-
-
-# Viscosity models
-vi_types = ['arrhenius_type', 'modified_wlf_type',
-            'power_law_type']  
 
 
 
@@ -26,7 +24,7 @@ class Chemical(object):
 
         # Component identification
         self._ID = ''
-        self._name = ''
+        self._name = name
 
         # Physical properties @298.15 - 1 atm 
         self._MW = 0.0   # Molecular weight
@@ -37,7 +35,9 @@ class Chemical(object):
         self._cost =0.0  # [$/kg]
         
         # Property methods
-        self._mu_model = 'power_law_type' #  
+        self._mu_model = 'custom'   # Viscosity model
+        self._rho_model = 'custom'  # Density model
+        self._st_model = 'custom'   # Surface tension model
 
         
     @property

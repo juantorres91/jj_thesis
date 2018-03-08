@@ -1,9 +1,23 @@
 import pyomo.environ as pe
 
-__all__ = ['arrhenius_type',
+__all__ = ['custom',
+           'arrhenius_type',
            'modified_wlf_type',
            'power_law_type']
 
+
+def custom(m, i, a1):
+    """
+    fixed viscosity
+    Parameters
+    ----------
+    i : str
+       Component index
+    a1 : Pa . s
+    """ 
+
+    return m.dymu[i] == a1
+    
 
 def arrhenius_type(m, i, a1 = 3, a2 = 20,):
 
