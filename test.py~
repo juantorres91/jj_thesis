@@ -1,0 +1,12 @@
+import pyomo.environ as pe
+from jj_thesis.Rheology import Chemical, Stream
+
+
+wat = Chemical(name = "wat")
+oil = Chemical(name = "oil")
+
+F1 = Stream()
+F1.add_chemical(wat)
+F1.add_chemical(oil)
+
+F1.pprint()

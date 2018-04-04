@@ -25,13 +25,21 @@ class Stream(pe.ConcreteModel):
         
         #
         # Model sets 
-        self.comp = pe.Set()  # Stream components 
+        self.comp = pe.Set()            # Stream components 
+        self.prop = pe.RangeSet(0,10)   # Coefficient set  
 
+        
         #
         # Model parameters
         self.MW = pe.Param(self.comp, default=0)       # Molecular weight
         self.tc = pe.Param(self.comp, default=298)     # Critric temperature
         self.pc = pe.Param(self.comp, default=101325)  # Critic pressure
+
+        self.mu_coef = pe.Param(self.comp, self.prop,
+                                mutable = True, default = 0)  # Viscosity coefficients 
+
+        self.rho_coef = pe.Param(self.comp, self.prop,
+                                 mutable = True, default =0)  # Density coefficients
         
         #
         # Model variables
@@ -49,8 +57,8 @@ class Stream(pe.ConcreteModel):
         self.xm = pe.Var(self.comp, bounds=(0,1))  # Molar fraction
         self.vf = pe.Var(self.comp, bounds=(0,1))  # Volume fraction 
         self.rho = pe.Var(self.comp, domain = pe.PositiveReals)   # Component density [kg/m3]
-        self.dymu = pe.Var(self.comp, domain = pe.PositiveReals)  # Component absolut viscosity [Pa.s] 
-        self.kmu = pe.Var(self.comp, domain = pe.PositiveReals)   # Component kynetic viscosiy [cSt]
+        self.dymu = pe.Var(self.comp, domain = pe.PositiveReals)  # Component absolut viscosity [mPa.s] 
+        self.kimu = pe.Var(self.comp, domain = pe.PositiveReals)  # Component kynetic viscosiy  [cSt]
         
         # Mixture properties
         self.Rho = pe.Var(domain = pe.PositiveReals)  # Mixture density [kg/m3]
@@ -61,6 +69,7 @@ class Stream(pe.ConcreteModel):
         self.__massbal_flag = False   # Boolean : Activated mass balance
         self.__molarbal_flag = False  # Boolean : Activated molar balance
         self.__volbal_flag = False    # Boolean : Activated 
+
         
     #
     # Component methods
@@ -79,7 +88,7 @@ class Stream(pe.ConcreteModel):
         """
         self.__chem.pop(name, None) 
         self.comp.remove(name)
-
+               
     #
     # Balance constraints
     #
@@ -160,7 +169,7 @@ class Stream(pe.ConcreteModel):
         if p < 0.0:
             raise Exception('Presure must be positive')
         else :
-            self.T.value = t
+            self.P.value = p
 
     def set_pressure_bounds(self, pmin = 0, pmax = float('inf')):
         """
@@ -175,18 +184,42 @@ class Stream(pe.ConcreteModel):
             self.P.setlb(pmin)
             self.P.setub(pmax)
 
-            
-if __name__ == '__main__':
+    #
+    # Viscosity methods
 
-    x = Chemical(name = 'a')
-    y = Chemical(name = 'b')
-    m = Stream()
+    @property
+    def viscosity(self):
 
-    m.add_chemical(x)
-    m.add_chemical(y)
-    m.enable_mass_balance()
-
-    m.del_chemical('a')
-    m.enable_mass_balance()
+        return self.Dmu.value()
     
-    m.pprint()
+    # Enable viscosity stimation
+    def enable_viscosity_calculation(self):
+
+        self.mu_cons = pe.ConstraintList() # Individual viscosity calculation
+        
+        # Coefficient modification
+        for i in self.comp:
+            for j in self.__chem[i].mu_parameters:
+
+                self.mu_coef[i,j] = self.__chem[i].mu_parameters[j]
+
+            self.mu_cons.add(self.__chem[i].get_viscosity_model()(self, i) )
+        
+
+
+#
+    # Viscosity methods
+
+    # Enable viscosity stimation
+    def enable_density_calculation(self):
+
+        self.rho_cons = pe.ConstraintList() # Individual viscosity calculation
+        
+        # Coefficient modification
+        for i in self.comp:
+            for j in self.__chem[i].rho_parameters:
+
+                self.rho_coef[i,j] = self.__chem[i].rho_parameters[j]
+
+            self.rho_cons.add(self.__chem[i].get_density_model()(self, i) )
+        

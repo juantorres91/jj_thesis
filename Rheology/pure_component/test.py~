@@ -1,0 +1,18 @@
+import chemical as ch
+import pyomo.environ as pe
+
+m = pe.ConcreteModel()
+m.comp = pe.Set(initialize = ['a', 'b'])
+m.dymu = pe.Var(m.comp)
+
+
+wat = ch.Chemical(name = 'wat')
+wat.viscosity_model = 'power_law_type'
+
+m.mu_const = pe.ConstraintList()
+
+
+if __name__ == '__main__':
+
+    print wat.viscosity_model
+    m.pprint()

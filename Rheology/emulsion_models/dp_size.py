@@ -81,7 +81,7 @@ def hinze_kolmogorov_model(den=1.1, st0=13, mu0=1):
         return 1e-6*m.dD == m.A_t*(1+m.A_n*(0.1*m.d_mu)*m.Ep**(0.33333) *(1e-6*m.dD)**(0.3333)/(1e-3*m.st))**0.6*m.dKI  
     m.dD_def = pe.Constraint(rule=dD_def)
 
-    return m
+    return intialize_model(m)
     
 
    
