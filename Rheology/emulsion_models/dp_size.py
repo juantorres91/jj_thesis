@@ -33,7 +33,7 @@ def initialize_model (m, disp = False):
     m.del_component(m.Obj)
     return m
 
-def h_k_model(ks = 11, d_I = 0.06, den = 1.1, st0 = 13, mu0=1, disp = False):
+def h_k_model(ks = 11, d_I = 0.06, den = 1.1, st0 = 20, mu0=100, disp = False):
 
     """
     Hinze - Kolmogorov drop model
@@ -45,10 +45,10 @@ def h_k_model(ks = 11, d_I = 0.06, den = 1.1, st0 = 13, mu0=1, disp = False):
     # Parameters 
     #
    
-    m.ks = pe.Param(default = ks)    # Otto Metzner Constant 
+    m.ks = pe.Param(default = ks)      # Otto Metzner Constant 
     m.A_t = pe.Param(default = 0.54)   # Davis- Hinze Kolmogorov [1]
     m.A_n = pe.Param(default = 4.1)    # Davis- Hinze Kolmogorov [2]
-    m.D_I = pe.Param(default = d_I)   # Imperler Diameter [m]
+    m.D_I = pe.Param(default = d_I)    # Imperler Diameter [m]
 
     #
     # Variables

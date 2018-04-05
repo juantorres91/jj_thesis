@@ -95,7 +95,7 @@ def oldroyd_viscosity_model(v0=0.3, k0=0.3, c_mu0=0.01, st0=13, dD0=4, mu0=10, S
     m.dD = pe.Var(initialize=dD0, bounds=(0.5,100))   # Dropplet size [1e-6 m]
 
     m.v = pe.Var(bounds=(0.001, 0.7), initialize=v0)       # Oil volume fraction [-]
-    m.k = pe.Var(bounds=(1e-7, 30), initialize=k0)         # Viscosity ratio [-]
+    m.k = pe.Var(bounds=(1e-7, 300), initialize=k0)         # Viscosity ratio [-]
     m.c_mu = pe.Var(domain=pe.PositiveReals, initialize=c_mu0)  # Continuous phase dynamic viscosity [P]
     m.mu = pe.Var(domain=pe.PositiveReals, initialize=mu0)    # Emulsion phase dynamic viscosity [P]
     

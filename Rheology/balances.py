@@ -41,4 +41,4 @@ def w_to_v_rule(m):
     Estimates the volume flow from mass flo
     """
 
-    return m.vol_flow == m.mass_flow * m.Rho
+    return m.vol_flow * m.Rho == m.mass_flow 

@@ -112,7 +112,7 @@ class Stream(pe.ConcreteModel):
         except:
             pass
 
-    def intialize_mass_flow(self, w = 10):
+    def initialize_mass_flow(self, w = 10):
         """
         Initializes mass flow
         """
