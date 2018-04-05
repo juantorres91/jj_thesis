@@ -1,13 +1,15 @@
 import pyomo.environ as pe
 from jj_thesis.Rheology import Chemical, Stream
 import jj_thesis.Rheology.emulsion_models.viscosity as em_v
-import jj_tesis.Rheology.emulsion_models.dp_size as dps
+import jj_thesis.Rheology.emulsion_models.dp_size as dps
+from pyomo.opt import SolverFactory
 
 ################################
 # Master model
 ################################
 
 m = pe.ConcreteModel() # Modelo integrado de diseno
+opt = SolverFactory("ipopt")
 
 # 
 # Propiedades de fluidos
@@ -15,7 +17,7 @@ m = pe.ConcreteModel() # Modelo integrado de diseno
 
 # Agua 
 wat = Chemical(name = "wat")
-wat.mu_parameters = {0 : 0.1}
+wat.mu_parameters = {0 : 1}
 wat.rho_parameters = {0: 1}
 
 CPh = Stream()          # Fase continua  
@@ -32,7 +34,7 @@ m.CPh = CPh
 
 # Aceite
 oil = Chemical(name = "oil")
-oil.mu_parameters = {0 : 0.1}
+oil.mu_parameters = {0 : 100}
 oil.rho_parameters = {0 : 0.8}
 
 DPh = Stream()
@@ -56,6 +58,11 @@ DPh.mass_flow.setub(30)
 def bal_const_rule(m):
     return m.DPh.mass_flow + m.CPh.mass_flow == 100
 m.bal_const = pe.Constraint(rule = bal_const_rule)
+
+
+# Inicializar corrientes 
+opt.solve(CPh)
+opt.solve(DPh)
 
 
 #####################################
@@ -83,6 +90,8 @@ m.Sr['appl'].fix(100) # Shear rate
 m.dM.setlb(3)
 m.dM.setub(30)
 
+m.ti.fix(20) 
+
 ###################################
 # Modelos de viscosidad de emulsion
 ###################################
@@ -94,11 +103,14 @@ m.oldy = pe.Block(m.cd, rule = oldy_init)
 # Calculo de variables de ensamble
 def vo_rule(m):
     return m.DPh.vol_flow == m.vo * m.CPh.vol_flow
-m.vo_cons = pe.Constraint(rule = vo_rule) 
+m.vo_cons = pe.Constraint(rule = vo_rule)
+m.vo.value = m.DPh.vol_flow.value / m.CPh.vol_flow.value
 
 def k_rule(m,i):
     return m.DPh.Dmu == m.k[i]*m.CPh.Dmu
 m.k_cons = pe.Constraint(m.cd, rule = k_rule)
+for i in m.cd:
+    m.k[i].value = m.DPh.Dmu.value / m.CPh.Dmu.value
 
 
 #
@@ -120,10 +132,34 @@ for i in m.cd:
     m.split_mu.add(expr = m.mu[i] == m.oldy[i].mu)
     m.split_mu.add(expr = m.CPh.Dmu == m.oldy[i].c_mu)
     
-
+"""
 #####################################
 # Diametro de particula
 ####################################
 
 m.dps = dps.h_k_model()
 
+# Restricciones de ensamble
+
+m.split_dp = pe.ConstraintList()
+
+m.split_dp.add(expr = m.CPh.Rho == m.dps.c_den)
+m.split_dp.add(expr = m.Sr['prop'] == m.dps.Sr)
+m.split_dp.add(expr = m.ti == m.dps.st)
+m.split_dp.add(expr = m.DPh.Dmu == m.dps.d_mu)
+
+####
+m.split_dp.add(expr = m.dM == m.dps.dD)
+
+m.split_dp.pprint()
+"""
+
+#########################
+# Caso de estudio
+########################333
+
+
+m.obj = pe.Objective(expr = -m.mu["appl"])
+
+
+opt.solve(m, tee = True)

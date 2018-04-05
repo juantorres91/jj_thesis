@@ -111,7 +111,13 @@ class Stream(pe.ConcreteModel):
             x.deactivate()
         except:
             pass
-                   
+
+    def intialize_mass_flow(self, w = 10):
+        """
+        Initializes mass flow
+        """
+        self.mass_flow.value = w
+        
     #
     # Temperature methods
     #

@@ -1,32 +1,39 @@
 import pyomo.environ as pe
-
+from pyomo.opt import SolverFactory
 __all__ = ['h_k_model']
 
 
-def initialize_model (m):
+_fixvar = ['c_den', 'st', 'd_mu']
+
+
+def initialize_model (m, disp = False):
     """ Initializes drop 
     """
 
     #Fixed Variables
-    m.bounds= ConstraintList()
+    m.bounds = pe.ConstraintList()
 
-    m.bounds.add(expr= m.c_den==den)
-    m.bounds.add(expr= m.st==st0)
-    m.bounds.add(expr= m.d_mu==mu0)
+    for i in _fixvar:
 
-    m.Obj=Objective(expr= pow(dp-m.dD,2))
+        try:
+            m.bounds.add(expr = m.getattr(i) == m.getattr(m).value)
+
+        except:
+            pass
+        
+    m.Obj = pe.Objective(expr= pow(5 -m.dD,2))
 
     # Solver
 
     opt = SolverFactory("ipopt")
-    opt.solve(m, tee=True)
+    opt.solve(m, tee = disp)
 
     
     m.del_component(m.bounds)
     m.del_component(m.Obj)
     return m
 
-def h_k_model(den=1.1, st0=13, mu0=1):
+def h_k_model(ks = 11, d_I = 0.06, den = 1.1, st0 = 13, mu0=1, disp = False):
 
     """
     Hinze - Kolmogorov drop model
@@ -38,10 +45,10 @@ def h_k_model(den=1.1, st0=13, mu0=1):
     # Parameters 
     #
    
-    m.ks = pe.Param(default=11.5)    # Otto Metzner Constant 
-    m.A_t = pe.Param(default=0.54)   # Davis- Hinze Kolmogorov [1]
-    m.A_n = pe.Param(default=4.1)    # Davis- Hinze Kolmogorov [2]
-    m.D_I = pe.Param(default=0.06)   # Imperler Diameter [m]
+    m.ks = pe.Param(default = ks)    # Otto Metzner Constant 
+    m.A_t = pe.Param(default = 0.54)   # Davis- Hinze Kolmogorov [1]
+    m.A_n = pe.Param(default = 4.1)    # Davis- Hinze Kolmogorov [2]
+    m.D_I = pe.Param(default = d_I)   # Imperler Diameter [m]
 
     #
     # Variables
@@ -81,7 +88,7 @@ def h_k_model(den=1.1, st0=13, mu0=1):
         return 1e-6*m.dD == m.A_t*(1+m.A_n*(0.1*m.d_mu)*m.Ep**(0.33333) *(1e-6*m.dD)**(0.3333)/(1e-3*m.st))**0.6*m.dKI  
     m.dD_def = pe.Constraint(rule=dD_def)
 
-    return intialize_model(m)
+    return initialize_model(m, disp)
     
 
    
