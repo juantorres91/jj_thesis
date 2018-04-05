@@ -63,14 +63,16 @@ class Stream(pe.ConcreteModel):
         # Mixture properties
         self.Rho = pe.Var(domain = pe.PositiveReals)  # Mixture density [kg/m3]
         self.Dmu = pe.Var(domain = pe.PositiveReals)  # Mixture dynamic viscosity
-
+        self.Kmu = pe.Var(domain = pe.PositiveReals)  # Mixture kinematic viscosity
         #
         # Balance constraints flags
         self.__massbal_flag = False   # Boolean : Activated mass balance
         self.__molarbal_flag = False  # Boolean : Activated molar balance
         self.__volbal_flag = False    # Boolean : Activated 
 
-        
+        # Hidden mixture property models
+
+        # self.Dmu_eq = pe.Constraint()
     #
     # Component methods
     #
@@ -190,7 +192,7 @@ class Stream(pe.ConcreteModel):
     @property
     def viscosity(self):
 
-        return self.Dmu.value()
+        return self.Dmu.value
     
     # Enable viscosity stimation
     def enable_viscosity_calculation(self):
@@ -203,14 +205,15 @@ class Stream(pe.ConcreteModel):
 
                 self.mu_coef[i,j] = self.__chem[i].mu_parameters[j]
 
+        # Model constraints
             self.mu_cons.add(self.__chem[i].get_viscosity_model()(self, i) )
-        
 
-
-#
+        # Activate mixture model
+        self._compute_mixture_viscosity()
+    #
     # Viscosity methods
 
-    # Enable viscosity stimation
+    # Enable viscosity estimation per component
     def enable_density_calculation(self):
 
         self.rho_cons = pe.ConstraintList() # Individual viscosity calculation
@@ -220,6 +223,44 @@ class Stream(pe.ConcreteModel):
             for j in self.__chem[i].rho_parameters:
 
                 self.rho_coef[i,j] = self.__chem[i].rho_parameters[j]
-
+        # Model constraint 
             self.rho_cons.add(self.__chem[i].get_density_model()(self, i) )
+
+        # Activate mixture model
+        self._compute_mixture_density()
+            
+    # Computes mixture methods
+    def _compute_mixture_viscosity(self,):
+   
+        if len(self.comp) == 1:
+
+            (i,) = self.comp  # Singleon element
+            
+            self.Dmu_eq =  pe.Constraint(expr = self.Dmu == self.dymu[i])
+
+        else :
+
+            pass 
+
+
+    def _compute_mixture_density(self,):
+
+        if len(self.comp) == 1:
+
+            (i,) = self.comp  # Singleon element
+            
+            self.Rho_eq =  pe.Constraint(expr = self.Rho== self.rho[i])
+
+        else :
+
+            pass 
+
         
+    #
+    # Combined flow methods
+
+    def activate_w_to_v(self):
+        
+        self.w2v = pe.Constraint(rule = bal.w_to_v_rule)
+
+

@@ -1,6 +1,6 @@
 import pyomo.environ as pe
 
-__all__ = ['hinze_kolmogorov_model']
+__all__ = ['h_k_model']
 
 
 def initialize_model (m):
@@ -26,7 +26,7 @@ def initialize_model (m):
     m.del_component(m.Obj)
     return m
 
-def hinze_kolmogorov_model(den=1.1, st0=13, mu0=1):
+def h_k_model(den=1.1, st0=13, mu0=1):
 
     """
     Hinze - Kolmogorov drop model

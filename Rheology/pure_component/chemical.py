@@ -25,7 +25,7 @@ class Chemical(object):
     name : str
        Compound name
     """ 
-    def __init__(self,ID = '', name = '' ):
+    def __init__(self, ID = '', name = '' ):
 
         # Component identification
         self._ID = ''
@@ -39,7 +39,7 @@ class Chemical(object):
         # Model parameters
         self._mu_par = dict()   # Dinamic viscosity parameter
         self._rho_par = dict()  # Density parameter
-        
+        self._cp_par = dict()   # CP parameters
         
         # Product cost
         self._cost = 0.0  # [$/kg]
