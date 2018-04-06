@@ -17,7 +17,7 @@ opt = SolverFactory("ipopt")
 
 # Agua 
 wat = Chemical(name = "wat")
-wat.mu_parameters = {0 : 1}
+wat.mu_parameters = {0 : 0.01}
 wat.rho_parameters = {0: 1}
 
 CPh = Stream()          # Fase continua  
@@ -36,7 +36,7 @@ m.CPh = CPh
 
 # Aceite
 oil = Chemical(name = "oil")
-oil.mu_parameters = {0 : 100}
+oil.mu_parameters = {0 : 1}
 oil.rho_parameters = {0 : 0.8}
 
 DPh = Stream()
@@ -105,7 +105,7 @@ m.ti.fix(20)
 
 # Calculo de variables de ensamble
 def vo_rule(m):
-    return m.DPh.vol_flow == m.vo *(m.DPh.vol_flow + m.CPh.vol_flow)
+    return m.DPh.vol_flow == m.vo * (m.DPh.vol_flow + m.CPh.vol_flow)
 m.vo_cons = pe.Constraint(rule = vo_rule)
 m.vo.value = m.DPh.vol_flow.value / (m.CPh.vol_flow.value + m.DPh.vol_flow.value)
 
@@ -124,15 +124,13 @@ old_appl = em_v.oldroyd_viscosity_model(v0 = 0.3,
                                         k0 = m.k[i].value,
                                         c_mu0 = m.CPh.Dmu.value)
 
-
 def oldy_rule(m,i):
     if i == 'prop':
         return old_prop
     else:
         return old_appl
 m.oldy = pe.Block(m.cd, rule = oldy_rule)
-
-    
+   
 #
 # Restricciones de ensamble
 m.split_cs = pe.ConstraintList()  # Lista de split constraints
@@ -157,7 +155,7 @@ for i in m.cd:
 #####################################
 # Diametro de particula
 ####################################
-
+"""
 m.dps = dps.h_k_model()
 
 # Restricciones de ensamble
@@ -174,7 +172,7 @@ m.split_dp.add(expr = m.dM == m.dps.dD)
 
 m.split_dp.pprint()
 
-
+""" 
 #########################
 # Caso de estudio
 ########################333
@@ -185,4 +183,4 @@ m.split_dp.pprint()
 m.obj = pe.Objective(expr = -m.mu["appl"])
 opt.solve(m, tee = True)
 
-#m.CPh.pprint()
+m.oldy.pprint()
