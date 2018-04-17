@@ -10,7 +10,7 @@ from pyomo.opt import SolverFactory
 
 m = pe.ConcreteModel() # Modelo integrado de diseno
 opt = SolverFactory("ipopt")
-
+opt2 = SolverFactory("scip")
 # 
 # Propiedades de fluidos
 
@@ -57,7 +57,7 @@ m.DPh = DPh
 # m.DPh.mass_flow.setlb()
 # m.DPh.mass_flow.setlb()
 
-DPh.mass_flow.setub(30)
+DPh.mass_flow.setub(40)
 
 
 def bal_const_rule(m):
@@ -80,7 +80,6 @@ m.cd = pe.Set(initialize = ['prop', 'appl'])  # Conjunto de condiciones
 m.mu = pe.Var(m.cd, domain = pe.PositiveReals)  # Emulsion viscosity 
 ###############
 
-
 # Variables compartidas
 m.vo = pe.Var(domain = pe.PositiveReals, bounds = (0,1))        # Fraccion volumetrica O/W
 m.dM = pe.Var(domain = pe.PositiveReals)        # D32 [mu m]
@@ -96,7 +95,7 @@ m.Sr['prop'].value = 1000   #
 
 m.dM.setlb(3)
 m.dM.setub(30)
-
+m.dM.fix(9.3)
 m.ti.fix(20) 
 
 ###################################
@@ -183,4 +182,5 @@ m.split_dp.pprint()
 m.obj = pe.Objective(expr = -m.mu["appl"])
 opt.solve(m, tee = True)
 
-m.oldy.pprint()
+#m.oldy.pprint()
+CPh.mass_flow.pprint()
