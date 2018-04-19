@@ -1,0 +1,78 @@
+set C:=
+'Wat'
+'Allatoin'
+'Glyce'
+'PEG'
+'Sorbi'
+'Urea'
+'PPG'
+'PCA'
+;
+
+set Oil:=
+'Glyce'; 
+
+
+set Hum:=
+'Sorbi'      #Sorbitol
+'Allatoin'   #Allatoin
+'Glyce'      #Glycerol
+'PEG'        #Polyethilene Glicol
+'PPG'        #Propylene Glicol 
+'PCA'        #Sodyum-2 pyrrolidone carboxylate
+'Urea'
+;
+
+set Exf:=
+'Urea'       #Urea
+;
+
+
+param MW:=
+
+'Wat'   18
+'Sorbi' 182.17
+'Glyce' 92.09
+'Allatoin' 158.121
+'PEG' 200
+'Urea' 60.06
+'PPG' 400
+'PCA' 151.09
+
+;
+
+
+param mu:=
+'Wat' 0.882
+'Glyce' 1100
+'Allatoin' 1
+'PEG'  7.4
+'Sorbi' 85.6
+'Urea' 1.42
+'PPG' 52
+'PCA' 1
+;
+
+param rho:=
+'Wat' 1
+'Allatoin' 1.45
+'Glyce' 1.26
+'PEG' 1.13
+'Sorbi' 1.49
+'Urea' 1.32
+'PPG' 1.04
+'PCA' 1.13
+;
+
+
+param cost:=
+'Glyce' 0.0162450396825397
+'Wat' 0.0026
+'Allatoin' 0.0893716666666667
+'PEG' 0.00926642857142857
+'Sorbi' 0.0609629375
+'Urea' 0.0151342857142857
+'PPG' 0.0335216346153846
+'PCA' 0.19795
+;
+
