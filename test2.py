@@ -38,11 +38,15 @@ m.CPh = CPh
 oil = Chemical(name = "oil")
 oil.mu_parameters = {0 : 1}
 oil.rho_parameters = {0 : 0.8}
+alm= Chemical(name="alm")
+alm.mu_parameters= {0 : 2}
+alm.rho_parameters = {0: 1.6}
 
 DPh = Stream()
 
 # Metodos de prediccion
 DPh.add_chemical(oil)
+Dph.add_chemical(alm)
 DPh.enable_viscosity_calculation()
 DPh.enable_density_calculation()
 

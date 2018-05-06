@@ -1,0 +1,42 @@
+import pyomo.environ as pe
+
+
+def continous_mix_time(Po = 0.0, di = 0.9, dt = 1.0, H = 1, fx_pn = True):
+
+    """
+    Estimates coutinous phase mixing time
+    Parameters
+    ----------
+
+    Po : [-]
+       Power number
+    di : [m]
+       Impeler diameter
+    dt :[m]
+       Tank diameter
+    H : [m]
+       Liquid height
+    """
+    
+    m = pe.ConcreteModel()
+    
+    # Parameters
+    m.di = pe.Param(initialize = di, mutable = True)
+    m.dt = pe.Param(initialize = dt, mutable = True)
+    m.H = pe.Param(intialize = H, mutable = True)
+
+    # Variables
+    m.Po = pe.Var(within = pe.PositiveReals, initialize = Po)  # Mixing Power number
+    m.N = pe.Var(within = pe.PositiveReals)                    # Mixing rpm 
+    m.m_time = pe.Var(within = pe.PositiveReals)               # Mixibg time
+    
+    if fx_pn:
+        m.Po.fix(Po)
+    
+    return m
+
+
+if __name__ = "__main__":
+    import sys
+    m = continous_mix_time()
+    m.pprint()
