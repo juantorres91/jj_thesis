@@ -39,17 +39,23 @@ oil = Chemical(name = "oil")
 oil.mu_parameters = {0 : 1}
 oil.rho_parameters = {0 : 0.8}
 
+hzn = Chemical(name = "hzl")
+hzn.mu_parameter = {0 : 1.5}
+hzn.rho_parameters = {0 : 0.5}
+
 DPh = Stream()
 
 # Metodos de prediccion
 DPh.add_chemical(oil)
 DPh.enable_viscosity_calculation()
 DPh.enable_density_calculation()
-
 DPh.activate_w_to_v()
+# DPh.enable_mass_balance()
 
 DPh.initialize_mass_flow(20)
 
+
+DPh.mass_balance.pprint()
 m.DPh = DPh
 
 # Restriccion balance de materia
@@ -63,7 +69,6 @@ DPh.mass_flow.setub(30)
 def bal_const_rule(m):
     return m.DPh.mass_flow + m.CPh.mass_flow == 100
 m.bal_const = pe.Constraint(rule = bal_const_rule)
-
 
 # Inicializar corrientes 
 opt.solve(CPh)
@@ -149,7 +154,7 @@ for i in m.cd:
     m.split_mu.add(expr = m.mu[i] == m.oldy[i].mu)
     m.split_mu.add(expr = m.CPh.Dmu == m.oldy[i].c_mu)
    
- 
+
 
 #####################################
 # Diametro de particula
@@ -175,8 +180,6 @@ m.split_dp.pprint()
 #########################
 # Caso de estudio
 ########################333
-
-
 
 
 m.obj = pe.Objective(expr = -m.mu["appl"])
