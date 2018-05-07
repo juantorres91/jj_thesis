@@ -1,0 +1,7 @@
+import pyomo.environ as pe
+
+
+m = pe.ConcreteModel()
+
+m.Re1 = pe.Disjunct()
+

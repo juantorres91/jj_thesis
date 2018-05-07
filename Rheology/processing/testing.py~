@@ -1,0 +1,6 @@
+import pyomo.environ as pe
+from premixing_models import premixing_model
+
+m = pe.ConcreteModel()
+m.pre_mix = premixing_model(model = 'hybrid')
+
